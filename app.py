@@ -1,9 +1,21 @@
+import pickle
 from flask import Flask, render_template, request
+import numpy as np
 
 app = Flask(__name__)
 
+
+def predictoin(list):
+    filename = 'model/predictor.pickel'
+
+    with open(filename, 'rb') as file:
+        model = pickle.load(file)
+    pred_value = model.predict([list])
+    return pred_value
+
 @app.route('/', methods=['POST', 'GET'])
 def index():
+    pred = 0
     if request.method == 'POST':
         ram = request.form['ram']
         weight = request.form['weight']
@@ -40,10 +52,12 @@ def index():
         traves(opsys_list, opsys)
         traves(cpu_list, cpuname)
         traves(gpu_list, gpuname)
-        print(feature_list)
-
-
-    return render_template('index.html')
+        
+        pred = predictoin(feature_list)*302.26
+        pred = np.round(pred[0], 2)
+    
+        
+    return render_template('index.html', pred = pred)
 
 if __name__ == '__main__':
     app.run(debug=True)
